@@ -1,20 +1,12 @@
 import { Button, Item, Label, Segment } from "semantic-ui-react";
-import { Activity } from "../../../app/models/activity";
 import { SyntheticEvent, useState } from "react";
 import { useStore } from "../../../app/stores/store";
+import { observer } from "mobx-react-lite";
 
-interface Props {
-    activities: Activity[];
-    deleteActivity: (id: string) => void;
-}
-
-export default function ActivityList(
-    {
-        activities,
-        deleteActivity,
-    }: Props) {
+export default observer(function ActivityList() {
 
 const {activityStore} = useStore();
+const {loading, deleteActivity, activitiesByDate} = activityStore;
 const [target, setTarget] = useState('');
         
 function handleDeleteActivity(e: SyntheticEvent<HTMLButtonElement>, id: string) {
@@ -24,7 +16,7 @@ function handleDeleteActivity(e: SyntheticEvent<HTMLButtonElement>, id: string) 
     return (
         <Segment>
             <Item.Group divided>
-                {activities.map(activity => (
+                {activitiesByDate.map(activity => (
                     <Item key={activity.id}>
                         <Item.Content>
                             <Item.Header as='a'>{activity.title}</Item.Header>
@@ -37,7 +29,7 @@ function handleDeleteActivity(e: SyntheticEvent<HTMLButtonElement>, id: string) 
                                 <Button floated="right" content="View" color="blue" onClick={() => activityStore.selectActivity(activity.id)} />
                                 <Button
                                     name={activity.id}
-                                    loading={activityStore.loading && target==activity.id}
+                                    loading={loading && target==activity.id}
                                     floated="right"
                                     content="Delete"
                                     color="red"
@@ -50,4 +42,4 @@ function handleDeleteActivity(e: SyntheticEvent<HTMLButtonElement>, id: string) 
             </Item.Group>
         </Segment>
     )
-}
+})

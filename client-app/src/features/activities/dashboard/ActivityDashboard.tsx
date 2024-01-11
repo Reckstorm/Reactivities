@@ -5,24 +5,14 @@ import ActivityForm from '../form/ActivityForm';
 import { useStore } from '../../../app/stores/store';
 import { observer } from 'mobx-react-lite';
 
-interface Props {
-    deleteActivity: (id: string) => void;
-}
-
-export default observer(function ActivityDashboard(
-    {
-        deleteActivity,
-    }: Props) {
+export default observer(function ActivityDashboard() {
         const {activityStore} = useStore();
         const {selectedActivity, editMode} = activityStore;
 
     return (
         <Grid>
             <GridColumn width='10'>
-                <ActivityList
-                    activities={activityStore.activities}
-                    deleteActivity={deleteActivity}
-                />
+                <ActivityList />
             </GridColumn>
             <Grid.Column width='6'>
                 {selectedActivity && !editMode &&
