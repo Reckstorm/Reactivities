@@ -1,5 +1,6 @@
 ﻿using Domain;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace Persistence
 {
@@ -7,7 +8,7 @@ namespace Persistence
     {
         public static async Task SeedData(DataContext context, UserManager<AppUser> userManager)
         {
-            if (!userManager.Users.Any())
+            if (!await userManager.Users.AnyAsync())
             {
                 var users = new List<AppUser>()
                 {
@@ -18,7 +19,7 @@ namespace Persistence
 
                 foreach (AppUser user in users)
                 {
-                    userManager.CreateAsync(user, "Pa$$w0rd");
+                    await userManager.CreateAsync(user, "Pa$$w0rd");
                 }
             }
             
