@@ -1,4 +1,6 @@
-﻿namespace API.DTOs;
+﻿using Domain;
+
+namespace API.DTOs;
 
 public class UserDto
 {
