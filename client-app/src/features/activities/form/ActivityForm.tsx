@@ -35,7 +35,7 @@ export default observer(function ActivityForm() {
         if (id) loadActivity(id).then(activity => setActivity(new ActivityFormValues(activity)));
     }, [id, loadActivity])
 
-    function handFormleSubmit(activity: ActivityFormValues) {
+    function handFormSubmit(activity: ActivityFormValues) {
         if (!activity.id) {
             activity.id = uuid();
             createActivity(activity).then(() => navigate(`/activities/${activity.id}`));
@@ -52,7 +52,7 @@ export default observer(function ActivityForm() {
                 validationSchema={validationSchema}
                 enableReinitialize
                 initialValues={activity}
-                onSubmit={values => handFormleSubmit(values)}>
+                onSubmit={values => handFormSubmit(values)}>
                 {({ handleSubmit, dirty, isSubmitting, isValid }) => (
                     <Form className="ui form" onSubmit={handleSubmit} autoComplete='off'>
                         <Header content='Activity Details' sub color="teal" />
