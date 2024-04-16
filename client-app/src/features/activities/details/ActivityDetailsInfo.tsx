@@ -7,7 +7,7 @@ interface Props {
     activity: Activity
 }
 
-export default observer(function ActivityDetailedInfo({activity}: Props) {
+export default observer(function ActivityDetailsInfo({activity}: Props) {
     return (
         <Segment.Group>
             <Segment attached='top'>

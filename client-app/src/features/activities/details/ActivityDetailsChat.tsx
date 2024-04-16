@@ -11,11 +11,12 @@ interface Props {
     activityId: string;
 }
 
-export default observer(function ActivityDetailedChat({ activityId }: Props) {
-    const { commentStore } = useStore();
+export default observer(function ActivityDetailsChat({ activityId }: Props) {
+    const { commentStore, activityStore } = useStore();
 
     useEffect(() => {
         if (activityId) {
+            if(activityStore.selectedActivity === undefined) activityStore.loadActivity(activityId);
             commentStore.createHubConnection(activityId);
         }
         return () => commentStore.clearComments();

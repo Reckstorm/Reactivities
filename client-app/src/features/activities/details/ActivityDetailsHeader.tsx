@@ -22,7 +22,7 @@ interface Props {
     activity: Activity
 }
 
-export default observer(function ActivityDetailedHeader({ activity }: Props) {
+export default observer(function ActivityDetailsHeader({ activity }: Props) {
     const { activityStore: { cancelActivityToggle, updateAttendance, loading } } = useStore();
 
     return (

@@ -7,7 +7,7 @@ interface Props {
     activity: Activity;
 }
 
-export default observer(function ActivityDetailedSidebar({ activity: { attendees, host } }: Props) {
+export default observer(function ActivityDetailsSidebar({ activity: { attendees, host } }: Props) {
     if (!attendees) return null;
     return (
         <>
