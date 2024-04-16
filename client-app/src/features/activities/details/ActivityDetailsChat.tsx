@@ -1,26 +1,17 @@
 import { observer } from 'mobx-react-lite'
 import { Segment, Header, Comment, Loader, Dimmer } from 'semantic-ui-react'
-import { useStore } from '../../../app/stores/store';
-import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Formik, Form, Field, FieldProps } from 'formik';
 import * as Yup from 'yup';
 import { formatDistanceToNow } from 'date-fns';
+import { ChatComment } from '../../../app/models/comment';
 
 interface Props {
-    activityId: string;
+    addComment: (values: { body: string, activityId?: string }) => Promise<void>;
+    comments: ChatComment[];
 }
 
-export default observer(function ActivityDetailsChat({ activityId }: Props) {
-    const { commentStore, activityStore } = useStore();
-
-    useEffect(() => {
-        if (activityId) {
-            if(activityStore.selectedActivity === undefined) activityStore.loadActivity(activityId);
-            commentStore.createHubConnection(activityId);
-        }
-        return () => commentStore.clearComments();
-    }, [commentStore, activityId]);
+export default observer(function ActivityDetailsChat({ addComment, comments }: Props) {
 
     return (
         <>
@@ -36,7 +27,7 @@ export default observer(function ActivityDetailsChat({ activityId }: Props) {
             <Segment attached clearing>
                 <Comment.Group>
                     <Formik
-                        onSubmit={(values, { resetForm }) => commentStore.addComment(values).then(() => resetForm())}
+                        onSubmit={(values, { resetForm }) => addComment(values).then(() => resetForm())}
                         initialValues={{ body: '' }}
                         validationSchema={Yup.object({ body: Yup.string().required() })}
                     >
@@ -66,7 +57,7 @@ export default observer(function ActivityDetailsChat({ activityId }: Props) {
                             </Form>
                         )}
                     </Formik>
-                    {commentStore.comments.map((comment) => (
+                    {comments.map((comment) => (
                         <Comment key={comment.id}>
                             <Comment.Avatar src={comment.image || '/assets/user.png'} />
                             <Comment.Content>

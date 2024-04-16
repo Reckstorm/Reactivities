@@ -10,14 +10,22 @@ import ActivityDetailsInfo from "./ActivityDetailsInfo";
 import ActivityDetailsSidebar from "./ActivityDetailsSidebar";
 
 export default observer(function ActivityDetails() {
-    const {activityStore} = useStore();
+    const {activityStore, commentStore} = useStore();
     const {selectedActivity: activity, loadActivity, loadingInitial, clearSelectedActivity} = activityStore;
+    const {createHubConnection, addComment, comments, clearComments} = commentStore;
     const {id}= useParams();
 
     useEffect(() => {
         if(id) loadActivity(id);
         return () => clearSelectedActivity();
     }, [id, loadActivity, clearSelectedActivity]);
+
+    useEffect(() => {
+        if (id) {
+            createHubConnection(id);
+        }
+        return () => clearComments();
+    }, [createHubConnection, addComment, clearComments, id]);
 
     if(loadingInitial || !activity) return <LoadingComponent content="Loading Activity"/>;
 
@@ -26,7 +34,7 @@ export default observer(function ActivityDetails() {
             <Grid.Column width={10}>
                 <ActivityDetailsHeader activity={activity}></ActivityDetailsHeader>
                 <ActivityDetailsInfo activity={activity}></ActivityDetailsInfo>
-                <ActivityDetailsChat activityId={activity.id}></ActivityDetailsChat>
+                <ActivityDetailsChat comments={comments} addComment={addComment}></ActivityDetailsChat>
             </Grid.Column>
             <Grid.Column width={6}>
                 <ActivityDetailsSidebar activity={activity}></ActivityDetailsSidebar>
