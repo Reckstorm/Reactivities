@@ -4,14 +4,20 @@ import { Link } from 'react-router-dom';
 import { Formik, Form, Field, FieldProps } from 'formik';
 import * as Yup from 'yup';
 import { formatDistanceToNow } from 'date-fns';
-import { ChatComment } from '../../../app/models/comment';
+import { useStore } from '../../../app/stores/store';
+import { useEffect } from 'react';
 
 interface Props {
-    addComment: (values: { body: string, activityId?: string }) => Promise<void>;
-    comments: ChatComment[];
+    activityId: string | undefined;
 }
 
-export default observer(function ActivityDetailsChat({ addComment, comments }: Props) {
+export default observer(function ActivityDetailsChat({ activityId }: Props) {
+    const { commentStore } = useStore();
+
+    useEffect(() => {
+        if (activityId) commentStore.createHubConnection(activityId);
+        return () => commentStore.clearComments();
+    }, [commentStore.clearComments, activityId]);
 
     return (
         <>
@@ -27,7 +33,7 @@ export default observer(function ActivityDetailsChat({ addComment, comments }: P
             <Segment attached clearing>
                 <Comment.Group>
                     <Formik
-                        onSubmit={(values, { resetForm }) => addComment(values).then(() => resetForm())}
+                        onSubmit={(values, { resetForm }) => commentStore.addComment(values).then(() => resetForm())}
                         initialValues={{ body: '' }}
                         validationSchema={Yup.object({ body: Yup.string().required() })}
                     >
@@ -36,7 +42,7 @@ export default observer(function ActivityDetailsChat({ addComment, comments }: P
                                 <Field name='body'>
                                     {(props: FieldProps) => (
                                         <div style={{ position: 'relative' }}>
-                                            <Dimmer active={isSubmitting} >
+                                            <Dimmer active={isSubmitting} inverted={true}>
                                                 <Loader />
                                             </Dimmer>
                                             <textarea
@@ -57,7 +63,7 @@ export default observer(function ActivityDetailsChat({ addComment, comments }: P
                             </Form>
                         )}
                     </Formik>
-                    {comments.map((comment) => (
+                    {commentStore.comments.map((comment) => (
                         <Comment key={comment.id}>
                             <Comment.Avatar src={comment.image || '/assets/user.png'} />
                             <Comment.Content>

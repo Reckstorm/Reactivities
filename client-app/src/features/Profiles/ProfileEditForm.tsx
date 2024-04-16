@@ -15,26 +15,23 @@ interface Props {
 export default observer(function ProfileEditForm({ profile, handleUpdateProfile }: Props) {
     const [partialProfile] = useState<Partial<Profile>>(profile);
 
-    const validationSchema = Yup.object({
-        displayName: Yup.string().required('Display name is required'),
-    })
-
     return (
         <>
             <Formik
-                validationSchema={validationSchema}
-                enableReinitialize
+                validationSchema={Yup.object({
+                    displayName: Yup.string().required('Display name is required')
+                })}
                 initialValues={partialProfile}
                 onSubmit={(values) => handleUpdateProfile(values)}>
                 {({ handleSubmit, dirty, isSubmitting, isValid }) => (
-                    <Form className="ui form" onSubmit={handleSubmit} autoComplete='off'>
+                    <Form className="ui form" onSubmit={handleSubmit}>
                         <MyTextInput placeholder="Display name" name='displayName' />
-                        <MyTextArea rows={3} placeholder="Add your bio" name='bio'/>
+                        <MyTextArea rows={3} placeholder="Add your bio" name='bio' />
                         <Button
                             disabled={isSubmitting || !dirty || !isValid}
                             loading={isSubmitting}
                             floated="right"
-                            positive 
+                            positive
                             type='submit'
                             content='Update profile' />
                     </Form>

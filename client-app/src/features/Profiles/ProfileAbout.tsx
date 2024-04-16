@@ -12,7 +12,6 @@ export default observer(function ProfileAbout() {
 
     function handleUpdateProfile(profile: Partial<Profile>){
         updateProfile(profile).then(() => setEditMode(false));
-
     }
 
     return (

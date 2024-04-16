@@ -12,32 +12,30 @@ export default class CommentStore {
     }
 
     createHubConnection = (activityId: string) => {
-        if (store.activityStore.selectedActivity) {
-            this.hubConnection = new HubConnectionBuilder()
-                .withUrl('http://localhost:5000/chat?activityId=' + activityId, {
-                    accessTokenFactory: () => store.userStore.user?.token!
-                })
-                .withAutomaticReconnect()
-                .configureLogging(LogLevel.Information)
-                .build();
+        this.hubConnection = new HubConnectionBuilder()
+            .withUrl('http://localhost:5000/chat?activityId=' + activityId, {
+                accessTokenFactory: () => store.userStore.user?.token!
+            })
+            .withAutomaticReconnect()
+            .configureLogging(LogLevel.Information)
+            .build();
 
-            this.hubConnection.start()
-                .catch(error => console.log("Error establishing chat connection: ", error));
-            this.hubConnection.on('LoadComments', (comments: ChatComment[]) => {
-                runInAction(() => {
-                    comments.forEach(comment => {
-                        comment.createdAt = new Date(comment.createdAt + 'Z');
-                    });
-                    this.comments = comments;
+        this.hubConnection.start()
+            .catch(error => console.log("Error establishing chat connection: ", error));
+        this.hubConnection.on('LoadComments', (comments: ChatComment[]) => {
+            runInAction(() => {
+                comments.forEach(comment => {
+                    comment.createdAt = new Date(comment.createdAt + 'Z');
                 });
+                this.comments = comments;
             });
-            this.hubConnection.on('ReceiveComment', (comment: ChatComment) => {
-                runInAction(() => {
-                    comment.createdAt = new Date(comment.createdAt);
-                    this.comments.unshift(comment);
-                });
+        });
+        this.hubConnection.on('ReceiveComment', (comment: ChatComment) => {
+            runInAction(() => {
+                comment.createdAt = new Date(comment.createdAt);
+                this.comments.unshift(comment);
             });
-        }
+        });
     }
 
     stopHubConnection = () => {
