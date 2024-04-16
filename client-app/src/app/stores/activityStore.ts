@@ -49,7 +49,9 @@ export default class ActivityStore {
     loadActivity = async (id: string) => {
         let activity = this.getActivity(id);
         if (activity) {
-            this.selectedActivity = activity;
+            // Remove setTimeout when deploying to production
+            // this.selectedActivity = activity;
+            setTimeout(() => runInAction(() => this.selectedActivity = activity), 50);
             return activity;
         }
         else {

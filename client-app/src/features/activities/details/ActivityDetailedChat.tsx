@@ -16,9 +16,9 @@ export default observer(function ActivityDetailedChat({ activityId }: Props) {
 
     useEffect(() => {
         if (activityId) {
-           commentStore.createHubConnection(activityId);
+            commentStore.createHubConnection(activityId);
         }
-        return () =>  commentStore.clearComments();
+        return () => commentStore.clearComments();
     }, [commentStore, activityId]);
 
     return (
@@ -34,7 +34,7 @@ export default observer(function ActivityDetailedChat({ activityId }: Props) {
             </Segment>
             <Segment attached clearing>
                 <Comment.Group>
-                <Formik
+                    <Formik
                         onSubmit={(values, { resetForm }) => commentStore.addComment(values).then(() => resetForm())}
                         initialValues={{ body: '' }}
                         validationSchema={Yup.object({ body: Yup.string().required() })}

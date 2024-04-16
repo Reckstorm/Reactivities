@@ -11,7 +11,7 @@ export default class CommentStore {
         makeAutoObservable(this);
     }
 
-    createHubConnection = async (activityId: string) => {
+    createHubConnection = (activityId: string) => {
         if (store.activityStore.selectedActivity) {
             this.hubConnection = new HubConnectionBuilder()
                 .withUrl('http://localhost:5000/chat?activityId=' + activityId, {
@@ -21,7 +21,7 @@ export default class CommentStore {
                 .configureLogging(LogLevel.Information)
                 .build();
 
-            await this.hubConnection.start()
+            this.hubConnection.start()
                 .catch(error => console.log("Error establishing chat connection: ", error));
             this.hubConnection.on('LoadComments', (comments: ChatComment[]) => {
                 runInAction(() => {
@@ -52,8 +52,6 @@ export default class CommentStore {
     addComment = async (values: { body: string, activityId?: string }) => {
         values.activityId = store.activityStore.selectedActivity?.id;
         try {
-            // if (this.hubConnection?.state !== 'Connected' && values.activityId) 
-            //     await this.createHubConnection(values.activityId);
             await this.hubConnection?.invoke("SendComment", values);
         } catch (error) {
             console.log(error);
