@@ -13,7 +13,7 @@ export interface IActivity {
   isCancelled?: boolean;
   hostUsername?: string;
   host?: Profile;
-  attendees?: Profile[];
+  attendees: Profile[];
 }
 
 export class Activity implements IActivity {
@@ -29,7 +29,7 @@ export class Activity implements IActivity {
   isCancelled: boolean = false;
   hostUsername: string = '';
   host?: Profile;
-  attendees?: Profile[];
+  attendees: Profile[] = [];
 
   constructor(init: ActivityFormValues){
     this.id = init.id!;
