@@ -10,7 +10,7 @@ interface Props {
 
 export default function ActivityListItem({ activity }: Props) {
     return (
-        <Segment.Group>
+        <Segment.Group className="ActivityItem">
             <Segment>
                 {activity.isCancelled && 
                     <Label

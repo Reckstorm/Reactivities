@@ -27,7 +27,7 @@ export default class ProfileStore {
     setActiveTab = (activeTab: number) => {
         this.activeTab = activeTab
     }
-    
+
     get isCurrentUser() {
         if (store.userStore.user?.username === this.profile?.username) {
             return store.userStore.user?.username === this.profile?.username;
@@ -126,16 +126,19 @@ export default class ProfileStore {
             await agent.Profiles.updateFollowing(username);
             store.activityStore.updateAttendeeFollowing(username);
             runInAction(() => {
+                //STUDY THIS LOGIC CAREFULLY
                 if (this.profile && this.profile.username !== store.userStore.user?.username && this.profile.username === username) {
                     following ? this.profile.followersCount++ : this.profile.followersCount--;
                     this.profile.following = !this.profile.following;
                 }
-                if (this.profile && this.profile.username === store.userStore.user?.username){
+                if (this.profile && this.profile.username === store.userStore.user?.username) {
                     following ? this.profile.followingCount++ : this.profile.followingCount--;
                 }
                 this.followings.forEach((profile) => {
-                    profile.following ? profile.followersCount-- : profile.followersCount++;
-                    profile.following = !profile.following;
+                    if (profile.username === username) {
+                        profile.following ? profile.followersCount-- : profile.followersCount++;
+                        profile.following = !profile.following;
+                    }
                 })
                 this.loading = false;
             })
