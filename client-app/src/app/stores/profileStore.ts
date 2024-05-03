@@ -2,6 +2,7 @@ import { makeAutoObservable, reaction, runInAction } from "mobx";
 import { Photo, Profile, UserActivity } from "../models/profile";
 import agent from "../api/agent";
 import { store } from "./store";
+import { Pagination, PagingParams } from "../models/pagination";
 
 export default class ProfileStore {
     profile: Profile | null = null;
@@ -9,11 +10,13 @@ export default class ProfileStore {
     uploading = false;
     loading = false;
     loadingFollowings = false;
+    loadingActivities: boolean = false;
     followings: Profile[] = [];
     activeTab = 0;
-    userActivities: UserActivity[] | null = null;
-    loadingActivities: boolean = false;
-    eventsActiveTab = 4;
+    private userActivitiesRegistry = new Map<string, UserActivity>();
+    pagination: Pagination | null = null;
+    pagingParams = new PagingParams();
+    predicate = new Map<string, string>();
 
 
     constructor() {
@@ -28,26 +31,54 @@ export default class ProfileStore {
             })
 
         reaction(
-            () => this.eventsActiveTab,
-            (activeTab) => {
-                if (activeTab === 0) {
-                    this.loadUserActivities('future', this.profile!.username);
-                } else if (activeTab === 1) {
-                    this.loadUserActivities('past', this.profile!.username);
-                } else if (activeTab === 2) {
-                    this.loadUserActivities('host', this.profile!.username);
-                } else {
-                    this.userActivities = null;
-                }
+            () => this.predicate.keys(),
+            () => {
+                this.pagingParams = new PagingParams(1, 12);
+                this.userActivitiesRegistry = new Map<string, UserActivity>();
+                this.loadUserActivities(this.profile!.username);
             })
+    }
+
+    get axiosParams() {
+        const params = new URLSearchParams();
+        params.append('pageNumber', this.pagingParams.pageNumber.toString());
+        params.append('pageSize', this.pagingParams.pageSize.toString());
+        this.predicate.forEach((value, key) => {
+            params.append(key, value as string);
+        })
+        return params;
+    }
+
+    get userActivities() {
+        return Array.from(this.userActivitiesRegistry.values());
+    }
+
+    setPredicate = (predicate: string, value: string) => {
+        const resetPredicate = () => {
+            this.predicate.forEach((value, key) => {
+                if (key !== 'hostusername') this.predicate.delete(key);
+            })
+        }
+        if (!this.predicate.has(predicate) || this.predicate.get(predicate) !== value) {
+            resetPredicate();
+            this.predicate.set(predicate, value);
+        }
+    }
+
+    setPagination = (pagination: Pagination) => {
+        this.pagination = pagination;
+    }
+
+    setPagingParams = (params: PagingParams) => {
+        this.pagingParams = params;
     }
 
     setActiveTab = (activeTab: number) => {
         this.activeTab = activeTab
     }
 
-    setEventsActiveTab = (eventsActiveTab: number) => {
-        this.eventsActiveTab = eventsActiveTab;
+    setUserActivity = (activity: UserActivity) => {
+        this.userActivitiesRegistry.set(activity.id, activity);
     }
 
     get isCurrentUser() {
@@ -184,14 +215,17 @@ export default class ProfileStore {
         }
     }
 
-    loadUserActivities = async (predicate: string, username: string) => {
+    loadUserActivities = async (username: string) => {
         this.loadingActivities = true;
         try {
-            const userActivities = await agent.Profiles.getUserActivities(predicate, username);
+            const result = (await agent.Profiles.getUserActivities(this.axiosParams, username));
             runInAction(() => {
-                this.userActivities = userActivities;
+                result.data.forEach(activity => {
+                    this.setUserActivity(activity);
+                })
                 this.loadingActivities = false;
             })
+            this.setPagination(result.pagination)
         } catch (error) {
             console.log(error);
             runInAction(() => this.loadingActivities = false)

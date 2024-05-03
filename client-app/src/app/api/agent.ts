@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import { router } from "../router/Routes";
 import { store } from "../stores/store";
 import { User, UserLoginForm } from "../models/user";
-import { Photo, Profile } from "../models/profile";
+import { Photo, Profile, UserActivity } from "../models/profile";
 import { PaginatedResult, PagingParams } from "../models/pagination";
 
 const sleep = (delay: number) => {
@@ -101,7 +101,7 @@ const Profiles = {
     update: (profile: Partial<Profile>) => requests.put<void>(`/profiles`, profile),
     updateFollowing: (username: string) => requests.post<void>(`/follow/${username}`, {}),
     listFollowings: (username: string, predicate: string) => requests.get<Profile[]>(`/follow/${username}?predicate=${predicate}`),
-    getUserActivities: (predicate: string, username: string) => requests.get<UserActivity[]>(`/profiles/${username}/activities?predicate=${predicate}`)
+    getUserActivities: (params: URLSearchParams, username: string) => axios.get<PaginatedResult<UserActivity[]>>(`/profiles/${username}/activities`, {params}).then(responseBody)
 }
 
 const agent = {

@@ -9,13 +9,12 @@ namespace Application.Profiles
 {
     public class List
     {
-        public class Query: IRequest<Result<List<UserActivityDto>>>
+        public class Query: IRequest<Result<PagedList<UserActivityDto>>>
         {
-            public string Predicate { get; set; }
-            public string HostUsername { get; set; }
+            public UserActivityParams Params { get; set; }
         }
 
-        public class Handler : IRequestHandler<Query, Result<List<UserActivityDto>>>
+        public class Handler : IRequestHandler<Query, Result<PagedList<UserActivityDto>>>
         {
             private readonly DataContext _context;
             private readonly IMapper _mapper;
@@ -26,26 +25,27 @@ namespace Application.Profiles
                 _mapper = mapper;
             }
 
-            public async Task<Result<List<UserActivityDto>>> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<Result<PagedList<UserActivityDto>>> Handle(Query request, CancellationToken cancellationToken)
             {
                 var query = _context.Activities
-                    .Where(a => a.Attendees.Any(aa => aa.AppUser.UserName == request.HostUsername))
+                    .Where(a => a.Attendees.Any(aa => aa.AppUser.UserName == request.Params.HostUsername))
                     .OrderByDescending(a => a.Date)
                     .ProjectTo<UserActivityDto>(_mapper.ConfigurationProvider)
                     .AsQueryable();
 
-                if (request.Predicate == "past") 
+                if (request.Params.Predicate == "past") 
                     query = query.Where(a => a.Date < DateTime.Now);
-                else if (request.Predicate == "host")
-                    query = query.Where(a => a.HostUsername == request.HostUsername);
+                else if (request.Params.Predicate == "host")
+                    query = query.Where(a => a.HostUsername == request.Params.HostUsername);
                 else
                     query = query.Where(a => a.Date > DateTime.Now);
 
-                var result = await query.ToListAsync();
+                //var result = await query.ToListAsync();
 
-                if (result == null) return null;
+                if (query == null) return null;
 
-                return Result<List<UserActivityDto>>.Success(result);
+                return Result<PagedList<UserActivityDto>>
+                    .Success(await PagedList<UserActivityDto>.CreateAsync(query, request.Params.PageNumber, request.Params.PageSize));
             }
         }
     }

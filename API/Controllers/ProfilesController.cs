@@ -1,10 +1,5 @@
-﻿using API.DTOs;
-using Application.Profiles;
-using Domain;
-using Microsoft.AspNetCore.Authorization;
+﻿using Application.Profiles;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Persistence;
 
 namespace API.Controllers;
 
@@ -23,8 +18,8 @@ public class ProfilesController : BaseApiController
     }
 
     [HttpGet("{username}/activities")]
-    public async Task<IActionResult> GetProfileActivities([FromQuery] string predicate, string username)
+    public async Task<IActionResult> GetProfileActivities([FromQuery] UserActivityParams param)
     {
-        return HandleResult(await Mediator.Send(new List.Query { Predicate = predicate, HostUsername = username }));
+        return HandlePagedResult(await Mediator.Send(new List.Query { Params = param }));
     }
 }
