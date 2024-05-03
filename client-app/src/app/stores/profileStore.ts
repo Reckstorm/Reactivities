@@ -1,5 +1,5 @@
 import { makeAutoObservable, reaction, runInAction } from "mobx";
-import { Photo, Profile } from "../models/profile";
+import { Photo, Profile, UserActivity } from "../models/profile";
 import agent from "../api/agent";
 import { store } from "./store";
 
@@ -11,6 +11,10 @@ export default class ProfileStore {
     loadingFollowings = false;
     followings: Profile[] = [];
     activeTab = 0;
+    userActivities: UserActivity[] | null = null;
+    loadingActivities: boolean = false;
+    eventsActiveTab = 4;
+
 
     constructor() {
         makeAutoObservable(this);
@@ -22,10 +26,28 @@ export default class ProfileStore {
                     activeTab === 3 ? this.loadFollowings("followers") : this.loadFollowings("following");
                 }
             })
+
+        reaction(
+            () => this.eventsActiveTab,
+            (activeTab) => {
+                if (activeTab === 0) {
+                    this.loadUserActivities('future', this.profile!.username);
+                } else if (activeTab === 1) {
+                    this.loadUserActivities('past', this.profile!.username);
+                } else if (activeTab === 2) {
+                    this.loadUserActivities('host', this.profile!.username);
+                } else {
+                    this.userActivities = null;
+                }
+            })
     }
 
     setActiveTab = (activeTab: number) => {
         this.activeTab = activeTab
+    }
+
+    setEventsActiveTab = (eventsActiveTab: number) => {
+        this.eventsActiveTab = eventsActiveTab;
     }
 
     get isCurrentUser() {
@@ -159,6 +181,20 @@ export default class ProfileStore {
         } catch (error) {
             console.log(error);
             runInAction(() => this.loadingFollowings = false);
+        }
+    }
+
+    loadUserActivities = async (predicate: string, username: string) => {
+        this.loadingActivities = true;
+        try {
+            const userActivities = await agent.Profiles.getUserActivities(predicate, username);
+            runInAction(() => {
+                this.userActivities = userActivities;
+                this.loadingActivities = false;
+            })
+        } catch (error) {
+            console.log(error);
+            runInAction(() => this.loadingActivities = false)
         }
     }
 }

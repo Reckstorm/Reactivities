@@ -42,3 +42,12 @@ body {
     font-size: 1.7em;
     font-weight: normal;
   }
+
+.innerTabPane{
+  border: none !important;
+  padding: 0 !important;
+}
+
+.profileEventCard{
+  width: calc(25% - 1.51em) !important;
+}
