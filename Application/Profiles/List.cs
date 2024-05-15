@@ -2,7 +2,6 @@
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Persistence;
 
 namespace Application.Profiles
@@ -34,13 +33,11 @@ namespace Application.Profiles
                     .AsQueryable();
 
                 if (request.Params.Predicate == "past") 
-                    query = query.Where(a => a.Date < DateTime.Now);
+                    query = query.Where(a => a.Date < DateTime.UtcNow);
                 else if (request.Params.Predicate == "host")
                     query = query.Where(a => a.HostUsername == request.Params.HostUsername);
                 else
-                    query = query.Where(a => a.Date > DateTime.Now);
-
-                //var result = await query.ToListAsync();
+                    query = query.Where(a => a.Date > DateTime.UtcNow);
 
                 if (query == null) return null;
 

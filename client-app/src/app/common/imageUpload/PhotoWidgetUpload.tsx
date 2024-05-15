@@ -9,7 +9,7 @@ interface Props{
 }
 
 export default function PhotoUploadWidget({uploadPhoto, loading}: Props) {
-    const [files, setFiles] = useState<File[]>([]);
+    const [files, setFiles] = useState<any>([]);
     const [cropper, setCropper] = useState<Cropper>();
 
     function onCrop() {
@@ -19,7 +19,7 @@ export default function PhotoUploadWidget({uploadPhoto, loading}: Props) {
     }
 
     useEffect(() => {
-        return () => files.forEach((file: File) => URL.revokeObjectURL(file.preview))
+        return () => files.forEach((file: any) => URL.revokeObjectURL(file.preview))
     }, [files]);
 
     return (

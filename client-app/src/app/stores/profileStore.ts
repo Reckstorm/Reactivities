@@ -55,7 +55,7 @@ export default class ProfileStore {
 
     setPredicate = (predicate: string, value: string) => {
         const resetPredicate = () => {
-            this.predicate.forEach((value, key) => {
+            this.predicate.forEach((_, key) => {
                 if (key !== 'hostusername') this.predicate.delete(key);
             })
         }

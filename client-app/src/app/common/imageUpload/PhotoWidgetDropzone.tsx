@@ -3,7 +3,7 @@ import {useDropzone} from 'react-dropzone'
 import { Header, Icon } from 'semantic-ui-react';
 
 interface Props{
-  setFiles: (files: File[]) => void;
+  setFiles: (files: any) => void;
 }
 
 export default function PhotoWidgetDropzone({setFiles} : Props) {
