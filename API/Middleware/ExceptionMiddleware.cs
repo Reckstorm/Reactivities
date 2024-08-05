@@ -31,7 +31,7 @@ public class ExceptionMiddleware
 
             var response = _env.IsDevelopment()
                 ? new AppException(context.Response.StatusCode, ex.Message, ex.StackTrace)
-                : new AppException(context.Response.StatusCode, ex.Message, ex.StackTrace);
+                : new AppException(context.Response.StatusCode, ex.Message);
 
             var options = new JsonSerializerOptions{PropertyNamingPolicy = JsonNamingPolicy.CamelCase};
             var json = JsonSerializer.Serialize(response, options);
