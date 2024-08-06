@@ -4,14 +4,15 @@ import agent from "../api/agent";
 import { store } from "./store";
 import { router } from "../router/Routes";
 
-export default class UserStore{
-    user: User | null = null
+export default class UserStore {
+    user: User | null = null;
+    fbLoading = false;
 
     constructor() {
         makeAutoObservable(this);
     }
 
-    get isLoggedIn(){
+    get isLoggedIn() {
         return !!this.user;
     }
 
@@ -42,15 +43,33 @@ export default class UserStore{
             const user = await agent.Account.current();
             runInAction(() => this.user = user)
         } catch (error) {
-            console.log(error);            
-        } 
+            console.log(error);
+        }
     }
 
     setImage = (image: string) => {
-        if(this.user) this.user.image = image;
+        if (this.user) this.user.image = image;
     }
 
     setDisplayName = (displayName: string) => {
-        if(this.user) this.user.displayName = displayName;
+        if (this.user) this.user.displayName = displayName;
+    }
+
+    facebookLogin = async (accessToken: string) => {
+        try {
+            this.fbLoading = true;
+            const user = await agent.Account.fbLogin(accessToken);
+            store.commonStore.setToken(user.token);
+            runInAction(() => {
+                this.user = user;
+                this.fbLoading = false;
+            });
+            router.navigate('/activities');
+        } catch (error) {
+            console.log(error);
+            runInAction(() => {
+                this.fbLoading = false;
+            })
+        }
     }
 }

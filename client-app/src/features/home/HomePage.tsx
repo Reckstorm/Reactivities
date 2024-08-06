@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
-import { Container, Header, Segment, Image, Button } from "semantic-ui-react";
+import { Container, Header, Segment, Image, Button, Divider } from "semantic-ui-react";
 import { useStore } from "../../app/stores/store";
 import { observer } from "mobx-react-lite";
 import LoginForm from "../users/LoginForm";
 import RegisterForm from "../users/RegisterForm";
+import FacebookLogin from "@greatsumini/react-facebook-login";
 
 export default observer(function HomePage() {
     const { userStore, modalStore } = useStore();
@@ -12,7 +13,7 @@ export default observer(function HomePage() {
             <Container text>
                 <Header as="h1" inverted>
                     <Image size='massive' src='/assets/logo.png' alt='logo' style={{ marginBottom: 12 }} />
-                    Reactivities!!!
+                    Reactivities
                 </Header>
                 {userStore.isLoggedIn ? (
                     <>
@@ -21,8 +22,19 @@ export default observer(function HomePage() {
                     </>
                 ) : (
                     <>
-                        <Button onClick={() => modalStore.openModal(<LoginForm/>)} size="huge" inverted content="Login" />
-                        <Button onClick={() => modalStore.openModal(<RegisterForm/>)} size="huge" inverted content="Register" />
+                        <Button onClick={() => modalStore.openModal(<LoginForm />)} size="huge" inverted content="Login" />
+                        <Button onClick={() => modalStore.openModal(<RegisterForm />)} size="huge" inverted content="Register" />
+                        <Divider horizontal inverted>Or</Divider>
+                        <FacebookLogin
+                            appId="805522018053611"
+                            onSuccess={(response) => {
+                                userStore.facebookLogin(response.accessToken);
+                            }}
+                            onFail={(error) => {
+                                console.log('Login Failed!', error);
+                            }}
+                            className={`ui button facebook huge inverted ${userStore.fbLoading && 'loading'}`}
+                        />
                     </>
                 )}
             </Container>
