@@ -20,6 +20,9 @@ namespace Application.Core
         {
             var count = await source.CountAsync();
             var totalPages = (int)Math.Ceiling(count / (double)pageSize);
+            
+            if (totalPages == 0) return new PagedList<T>([], pageNumber, pageSize, count, totalPages);
+
             pageNumber = pageNumber > totalPages ? totalPages : pageNumber;
             var items = await source.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
             return new PagedList<T>(items, pageNumber, pageSize, count, totalPages);
