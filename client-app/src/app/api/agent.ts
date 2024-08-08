@@ -24,30 +24,35 @@ axios.interceptors.request.use(config => {
 axios.interceptors.response.use(async response => {
     if (import.meta.env.DEV) await sleep(1000);
     const pagination = response.headers['pagination'];
-    if(pagination){
+    if (pagination) {
         response.data = new PaginatedResult<any>(response.data, JSON.parse(pagination));
     }
     return response;
 }, (error: AxiosError) => {
-    const {data, status, config} = error.response as AxiosResponse;
+    const { data, status, config, headers } = error.response as AxiosResponse;
     switch (status) {
-        case 400:            
-            if (config.method === 'get' && data.errors !== undefined && Object.prototype.hasOwnProperty.call(data.errors, 'id')){
+        case 400:
+            if (config.method === 'get' && data.errors !== undefined && Object.prototype.hasOwnProperty.call(data.errors, 'id')) {
                 router.navigate('/not-found');
             }
-            if (data.errors){
+            if (data.errors) {
                 const modalStateErrors = [];
-                for(const key in data.errors){
-                    if(data.errors[key]) modalStateErrors.push(data.errors[key]);
+                for (const key in data.errors) {
+                    if (data.errors[key]) modalStateErrors.push(data.errors[key]);
                 }
                 throw modalStateErrors.flat();
             }
-            else{
+            else {
                 toast.error(data);
             }
             break;
         case 401:
-            toast.error('unauthorised');
+            if (status === 401 && headers['www-authenticate']?.startsWith('Bearer error="invalid_token')) {
+                store.userStore.logout();
+                toast.error('Session expired - please login again');
+            } else {
+                toast.error('unauthorised');
+            }
             break;
         case 403:
             toast.error('forbidden');
@@ -73,7 +78,7 @@ const requests = {
 }
 
 const Activities = {
-    list: (params: URLSearchParams) => axios.get<PaginatedResult<Activity[]>>('/activities', {params}).then(responseBody),
+    list: (params: URLSearchParams) => axios.get<PaginatedResult<Activity[]>>('/activities', { params }).then(responseBody),
     details: (id: string) => requests.get<Activity>(`/activities/${id}`),
     create: (activity: ActivityFormValues) => requests.post<void>('/activities', activity),
     update: (activity: ActivityFormValues) => requests.put<void>(`/activities/${activity.id}`, activity),
@@ -85,7 +90,8 @@ const Account = {
     current: () => requests.get<User>('/account'),
     login: (user: UserLoginForm) => requests.post<User>('/account/login', user),
     register: (user: UserLoginForm) => requests.post<User>('/account/register', user),
-    fbLogin: (accessToken: string) => requests.post<User>(`/account/fbLogin?accessToken=${accessToken}`, {})
+    fbLogin: (accessToken: string) => requests.post<User>(`/account/fbLogin?accessToken=${accessToken}`, {}),
+    refreshToken: () => requests.post<User>('/account/refreshToken', {})
 }
 
 const Profiles = {
@@ -94,7 +100,7 @@ const Profiles = {
         const formData = new FormData;
         formData.append("File", file);
         return axios.post<Photo>('photos', formData, {
-            headers: {'Content-Type': 'multipart/form-data'},
+            headers: { 'Content-Type': 'multipart/form-data' },
         });
     },
     setMainPhoto: (id: string) => requests.post<void>(`photos/${id}/setmain`, {}),
@@ -102,7 +108,7 @@ const Profiles = {
     update: (profile: Partial<Profile>) => requests.put<void>(`/profiles`, profile),
     updateFollowing: (username: string) => requests.post<void>(`/follow/${username}`, {}),
     listFollowings: (username: string, predicate: string) => requests.get<Profile[]>(`/follow/${username}?predicate=${predicate}`),
-    getUserActivities: (params: URLSearchParams, username: string) => axios.get<PaginatedResult<UserActivity[]>>(`/profiles/${username}/activities`, {params}).then(responseBody)
+    getUserActivities: (params: URLSearchParams, username: string) => axios.get<PaginatedResult<UserActivity[]>>(`/profiles/${username}/activities`, { params }).then(responseBody)
 }
 
 const agent = {
