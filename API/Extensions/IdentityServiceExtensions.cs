@@ -4,6 +4,7 @@ using Domain;
 using Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Persistence;
 
@@ -16,7 +17,11 @@ public static class IdentityServiceExtensions
         services.AddIdentityCore<AppUser>(opt =>
         {
             opt.Password.RequireNonAlphanumeric = false;
-        }).AddEntityFrameworkStores<DataContext>();
+            opt.SignIn.RequireConfirmedEmail = true;
+        })
+        .AddDefaultTokenProviders()
+        .AddSignInManager<SignInManager<AppUser>>()
+        .AddEntityFrameworkStores<DataContext>();
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"]));
         

@@ -3,6 +3,7 @@ import { User, UserLoginForm } from "../models/user";
 import agent from "../api/agent";
 import { store } from "./store";
 import { router } from "../router/Routes";
+import { isAxiosError } from "axios";
 
 export default class UserStore {
     user: User | null = null;
@@ -29,12 +30,16 @@ export default class UserStore {
     }
 
     register = async (creds: UserLoginForm) => {
-        const user = await agent.Account.register(creds);
-        store.commonStore.setToken(user.token);
-        this.startRefreshTokenTimer(user);
-        runInAction(() => this.user = user);
-        router.navigate('/activities');
-        store.modalStore.closeModal();
+        try {
+            await agent.Account.register(creds);
+            router.navigate(`/account/registerSuccess?email=${creds.email}`)
+            store.modalStore.closeModal();
+        } catch (error) {
+            if (isAxiosError(error) && error?.response?.status === 400) throw error;
+            store.modalStore.closeModal();
+            console.log(500);
+        }
+
     }
 
     logout = async () => {
